@@ -23,6 +23,3 @@ Proyecto del curso **Big Data** (UNAD) que analiza datos abiertos de inversiones
 ## 4. Estructura del repositorio
 - `codigo/`: scripts de Python (batch y streaming)
 - `imagenes/`: capturas con la evidencia de cada paso
-
-## 5. Paso a paso
-*(Aquí van las capturas con su descripción.)*
