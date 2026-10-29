@@ -59,3 +59,41 @@ Con Kafka y ZooKeeper activos y el topic `inversiones` creado, se ejecutaron dos
 
 <img width="1802" height="761" alt="bach " src="https://github.com/user-attachments/assets/a19d92df-901e-4887-9d8a-6c705130b48d" />
 
+## 6. Resultados principales
+- **Limpieza:** de 8.437 a 8.372 registros tras eliminar duplicados, nulos y valores no válidos.
+- **Clase de inversión líder:** TES UVR, con 10.308,9 miles de millones de pesos en valor de mercado (568 títulos), seguida por los fondos que replican índices accionarios (8.883,4).
+- **Moneda:** 5.966 títulos en pesos colombianos (71 %), 1.527 en dólares y 603 en UVR.
+- **Valorización:** el valor de mercado supera al de compra en promedio unos 330 millones de pesos por título.
+- **Entidad:** el dataset contiene únicamente a COLFONDOS, con 47.487,7 miles de millones de pesos en valor de mercado.
+- **Streaming:** Spark procesó los eventos del topic `inversiones` en micro-lotes, con ventanas de 1 minuto por moneda (la captura muestra el Batch 48).
+
+## 7. Cómo ejecutarlo
+1. Descargar el dataset y subirlo a HDFS (usuario `hadoop`):
+   ```
+   wget -O dataset.csv https://www.datos.gov.co/api/v3/views/nug7-ugd3/query.csv
+   hdfs dfs -mkdir /Tarea4
+   hdfs dfs -put /home/hadoop/dataset.csv /Tarea4
+   ```
+2. Batch (usuario `vboxuser`):
+   ```
+   python3 codigo/batch1.py
+   python3 codigo/batch2.py
+   ```
+3. Iniciar ZooKeeper y Kafka y crear el topic:
+   ```
+   sudo /opt/Kafka/bin/zookeeper-server-start.sh -daemon /opt/Kafka/config/zookeeper.properties
+   sudo /opt/Kafka/bin/kafka-server-start.sh -daemon /opt/Kafka/config/server.properties
+   /opt/Kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic inversiones
+   ```
+4. Streaming, en dos terminales:
+   ```
+   python3 codigo/inv_producer.py
+   spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.8 codigo/inv_consumer.py
+   ```
+
+## 8. Conclusiones
+- Un mismo flujo de trabajo permite combinar análisis histórico (batch) y análisis en tiempo real (streaming).
+- La limpieza previa evita resultados distorsionados por duplicados y datos vacíos.
+- El portafolio analizado se concentra en renta fija local (TES) y en fondos de inversión.
+- Hadoop, Spark y Kafka funcionan en un entorno virtualizado pequeño, y la misma lógica puede aplicarse a volúmenes mucho mayores.
+- Los eventos de streaming son simulados con las categorías reales del dataset.
